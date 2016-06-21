@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <string.h>
+#include <ostree.h>
 
 #include "libglnx.h"
 #include "libostreetest.h"
@@ -171,6 +172,30 @@ test_raw_file_to_archive_z2_stream (gconstpointer data)
   g_assert_cmpint (checks, >, 0);
 }
 
+static void
+test_repo_is_created (gconstpointer data)
+{
+  OstreeRepo *repo = OSTREE_REPO (data);
+  gboolean exists = 0;
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GFile) path;
+  int success
+
+  /* Test a return value of TRUE on a repo that exists */
+  success = ostree_repo_is_created (repo, &exists, error);
+  g_assert (success && exists);
+  g_object_unref(repo);
+  /* Test a return value of FALSE on a repo that does not exist */
+  // Create an empty directory
+  mkdir ("not-a-repo", 777);
+  // Create a repo struct associated with that directory
+  path = g_file_new_for_path ("not-a-repo");
+  repo = ostree_repo_new (path);
+  // Check to see if that repo has been initialized in the filesystem (it shouldn't have been)
+  success = ostree_repo_is_created (repo, &exists, error);
+  g_assert (success && !exists);
+}
+
 int main (int argc, char **argv)
 {
   g_autoptr(GError) error = NULL;
@@ -184,6 +209,7 @@ int main (int argc, char **argv)
   
   g_test_add_data_func ("/repo-not-system", repo, test_repo_is_not_system);
   g_test_add_data_func ("/raw-file-to-archive-z2-stream", repo, test_raw_file_to_archive_z2_stream);
+  g_test_add_data_func ("/repo-created", repo, test_repo_is_created);
 
   return g_test_run();
  out:

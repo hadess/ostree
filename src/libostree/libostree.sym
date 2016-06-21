@@ -349,4 +349,5 @@ global:
 LIBOSTREE_2016.7 {
 global:
         ostree_repo_resolve_rev_ext;
+        ostree_repo_is_created;
 } LIBOSTREE_2016.6;
